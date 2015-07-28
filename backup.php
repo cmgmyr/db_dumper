@@ -11,7 +11,7 @@ $localPath = __DIR__ . DIRECTORY_SEPARATOR . 'exports' . DIRECTORY_SEPARATOR;
 $timestamp = (new DateTime('NOW', new DateTimeZone('America/New_York')))->format('Y-m-d\_H:i:sP');
 $extension = '.sql.gz';
 
-$ignored = ['information_schema', 'mysql', 'performance_schema', 'test'];
+$ignored = explode(',', getenv('DB_IGNORE'));
 $dbh = new PDO("mysql:host=" . getenv('DB_HOST'), getenv('DB_USERNAME'), getenv('DB_PASSWORD'));
 $dbs = $dbh->query('SHOW DATABASES');
 
