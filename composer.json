@@ -1,0 +1,15 @@
+{
+    "name": "cmgmyr/db-export",
+    "description": "Easily exports all databases from a specified host",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Chris Gmyr",
+            "email": "cmgmyr@gmail.com"
+        }
+    ],
+    "require": {
+        "vlucas/phpdotenv": "^2.0",
+        "rackspace/php-opencloud": "^1.14"
+    }
+}
