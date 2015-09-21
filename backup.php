@@ -1,14 +1,15 @@
 <?php
+require_once 'vendor/autoload.php';
 
 use OpenCloud\Rackspace;
-
-require_once 'vendor/autoload.php';
 
 $dotenv = new Dotenv\Dotenv(__DIR__);
 $dotenv->load();
 
 $localPath = __DIR__ . DIRECTORY_SEPARATOR . 'exports' . DIRECTORY_SEPARATOR;
-$timestamp = (new DateTime('NOW', new DateTimeZone('America/New_York')))->format('Y-m-d\_H:i:sP');
+$formatString = 'Y-m-d\_H:iP';
+$now = (new DateTime('NOW', new DateTimeZone('America/New_York')));
+$past = (new DateTime('NOW', new DateTimeZone('America/New_York')))->sub(new DateInterval('P1M'));
 $extension = '.sql.gz';
 
 $ignored = explode(',', getenv('DB_IGNORE'));
@@ -35,8 +36,17 @@ while (($db = $dbs->fetchColumn(0)) !== false) {
 
     // upload to RS
     $data = fopen($localPath . $db . $extension, 'r+');
-    $rsContainer->uploadObject($db . '/' . $timestamp . $extension, $data);
+    $rsContainer->uploadObject($db . '/' . $now->format($formatString) . $extension, $data);
 
     // delete local file
     unlink($localPath . $db . $extension);
+
+    // remove the file from 30 days ago, except if it's the first one
+    if ($now->format('H') != 0) {
+        try {
+            $rsContainer->getObject($db . '/' . $past->format($formatString) . $extension)->delete();
+        } catch (Exception $e) {
+            // we don't care if we try to delete an object that doesn't exist
+        }
+    }
 }
