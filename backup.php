@@ -42,7 +42,7 @@ while (($db = $dbs->fetchColumn(0)) !== false) {
     unlink($localPath . $db . $extension);
 
     // remove the file from 30 days ago, except if it's the first one
-    if ($now->format('H') != 0) {
+    if ($now->format('H') != '00') {
         try {
             $rsContainer->getObject($db . '/' . $past->format($formatString) . $extension)->delete();
         } catch (Exception $e) {
