@@ -10,6 +10,6 @@
     ],
     "require": {
         "vlucas/phpdotenv": "^2.0",
-        "rackspace/php-opencloud": "^1.14"
+        "gliterd/backblaze-b2": "^1.0"
     }
 }

@@ -1,10 +1,13 @@
 <?php
-require_once 'vendor/autoload.php';
 
-use OpenCloud\Rackspace;
+use BackblazeB2\Client;
+
+require_once 'vendor/autoload.php';
 
 $dotenv = new Dotenv\Dotenv(__DIR__);
 $dotenv->load();
+
+$client = new Client(getenv('B2_ACCOUNT_ID'), getenv('B2_MASTER_KEY'));
 
 $localPath = __DIR__ . DIRECTORY_SEPARATOR . 'exports' . DIRECTORY_SEPARATOR;
 $formatString = 'Y-m-d\_H:iP';
@@ -16,14 +19,6 @@ $ignored = explode(',', getenv('DB_IGNORE'));
 $dbh = new PDO("mysql:host=" . getenv('DB_HOST'), getenv('DB_USERNAME'), getenv('DB_PASSWORD'));
 $dbs = $dbh->query('SHOW DATABASES');
 
-$rsClient = new Rackspace(Rackspace::US_IDENTITY_ENDPOINT, array(
-    'username' => getenv('RS_USERNAME'),
-    'apiKey'   => getenv('RS_API_KEY')
-));
-
-$rsService = $rsClient->objectStoreService('cloudFiles', getenv('RS_LOCATION'));
-$rsContainer = $rsService->getContainer(getenv('RS_CONTAINER'));
-
 while (($db = $dbs->fetchColumn(0)) !== false) {
     if (in_array($db, $ignored)) {
         continue;
@@ -34,9 +29,13 @@ while (($db = $dbs->fetchColumn(0)) !== false) {
     // generate the dump file
     system("mysqldump -h " . getenv('DB_HOST') . " --lock-tables=false --user=" . getenv('DB_USERNAME') . " --password=" . getenv('DB_PASSWORD') . " --add-drop-database " . $db . " | gzip -c > " . $localPath . $db . $extension);
 
-    // upload to RS
+    // upload to B2
     $data = fopen($localPath . $db . $extension, 'r+');
-    $rsContainer->uploadObject($db . '/' . $now->format($formatString) . $extension, $data);
+    $client->upload([
+        'BucketName' => getenv('B2_BUCKET'),
+        'FileName' => $db . '/' . $now->format($formatString) . $extension,
+        'Body' => $data,
+    ]);
 
     // delete local file
     unlink($localPath . $db . $extension);
@@ -44,7 +43,10 @@ while (($db = $dbs->fetchColumn(0)) !== false) {
     // remove the file from 30 days ago, except if it's the first one
     if ($now->format('H') != '00') {
         try {
-            $rsContainer->getObject($db . '/' . $past->format($formatString) . $extension)->delete();
+            $client->deleteFile([
+                'BucketName' => getenv('B2_BUCKET'),
+                'FileName' => $db . '/' . $past->format($formatString) . $extension,
+            ]);
         } catch (Exception $e) {
             // we don't care if we try to delete an object that doesn't exist
         }
