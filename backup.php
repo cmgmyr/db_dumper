@@ -27,7 +27,7 @@ while (($db = $dbs->fetchColumn(0)) !== false) {
     echo "Exporting " . $db . " now...\n";
 
     // generate the dump file
-    system("mysqldump -h " . getenv('DB_HOST') . " --lock-tables=false --user=" . getenv('DB_USERNAME') . " --password=" . getenv('DB_PASSWORD') . " --add-drop-database " . $db . " | gzip -c > " . $localPath . $db . $extension);
+    system("mysqldump -h " . getenv('DB_HOST') . " --single-transaction --user=" . getenv('DB_USERNAME') . " --password=" . getenv('DB_PASSWORD') . " --add-drop-database " . $db . " | gzip -c > " . $localPath . $db . $extension);
 
     // upload to B2
     $data = fopen($localPath . $db . $extension, 'r+');
