@@ -16,7 +16,7 @@ $past = (new DateTime('NOW', new DateTimeZone('America/New_York')))->sub(new Dat
 $extension = '.sql.gz';
 
 $ignored = explode(',', getenv('DB_IGNORE'));
-$dbh = new PDO("mysql:host=" . getenv('DB_HOST'), getenv('DB_USERNAME'), getenv('DB_PASSWORD'));
+$dbh = new PDO('mysql:host=' . getenv('DB_HOST') . ';port=' . getenv('DB_PORT'), getenv('DB_USERNAME'), getenv('DB_PASSWORD'));
 $dbs = $dbh->query('SHOW DATABASES');
 
 while (($db = $dbs->fetchColumn(0)) !== false) {
