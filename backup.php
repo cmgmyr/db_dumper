@@ -4,7 +4,7 @@ use BackblazeB2\Client;
 
 require_once 'vendor/autoload.php';
 
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv = new Dotenv\Dotenv(__DIR__);
 $dotenv->load();
 
 $client = new Client(getenv('B2_ACCOUNT_ID'), getenv('B2_MASTER_KEY'));
