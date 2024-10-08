@@ -10,7 +10,7 @@
     ],
     "require": {
         "php": "^8.0",
-        "vlucas/phpdotenv": "^2.0",
+        "vlucas/phpdotenv": "^5.0",
         "gliterd/backblaze-b2": "^1.0"
     }
 }
